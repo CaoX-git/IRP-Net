@@ -2,19 +2,11 @@
 ## 工程文件树
 
 ```
-IRP-Net/
-├── archive
-│   ├── CBAM_ResUNet
-│   │   ├── checkpoints
-│   │   │   ├── best.pth
-│   │   │   └── last.pth
-│   │   └── train_log.csv
-│   └── CBAM_UNet
-│       ├── checkpoints
-│       │   ├── best.pth
-│       │   └── last.pth
-│       └── train_log.csv
 ├── checkpoints
+│   ├── checkpoints
+│   │   ├── best.pth
+│   │   └── last.pth
+│   └── train_log.csv
 ├── data_template
 │   ├── dataset_experiment
 │   │   ├── 001.png
@@ -69,23 +61,20 @@ IRP-Net/
 │               ├── 1_4.298.png
 │               └── 1_4.658.png
 ├── deploy
-│   └── export.py
-├── exports
-│   ├── onnx
-│   └── pt
-├── legacy
-│   ├── data_loader.py
-│   └── trainer.py
+│   ├── export.py
+│   └── test_deploy.py
 ├── models
 │   ├── __init__.py
 │   ├── model_CBAM_ResUNet.py
 │   ├── model_CBAM_ResUNet_nobridge.py
 │   ├── model_CBAM_UNet.py
 │   ├── model_CBAM_UNet_nobridge.py
+│   ├── model_ResUNet.py
 │   └── model_UNet.py
 ├── results
-│   └── prediction_result.png
+│   └── CBAM_ResUNet_nobridge_260205144124_prediction_result.png
 ├── scripts
+│   ├── handle_checkpoints.py
 │   └── visualize_cbam_unet.py
 ├── utils
 │   ├── accuracy.py
