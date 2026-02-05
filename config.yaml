@@ -1,0 +1,55 @@
+# config.yaml
+
+# data loader config
+data:
+  imgs_dir: "E:\\AAA_WorkFolder\\Project\\IRP-Net\\data\\dataset_5000_v1\\images"
+  labels_dir: "E:\\AAA_WorkFolder\\Project\\IRP-Net\\data\\dataset_5000_v1\\labels"
+  splits: [0.8, 0.1, 0.1] # train, val, test
+  batch_size: 8
+  num_workers: 0
+
+augmentation:
+  shuffle: true
+  enabled: true
+  min_crop_scale: 0.5
+  rotation_range: 30
+  contrast_range: [0.8, 1.2]
+
+# model config
+model: 
+  type: "CBAM_UNet_nobridge"
+  params:
+    base_c: 64
+
+
+# training config
+training:
+  loss_type: "MaskWeightedMSELoss" 
+  loss_params: null 
+    #   weight_bce: 0.6
+    #   weight_dice: 0.4
+
+  evaluator_type: null
+  evaluator_params: null
+
+  optimizer:
+    type: "Adam"      
+    lr: 0.001
+    weight_decay: 0.0001
+    params:           
+      betas: [0.9, 0.999]
+  
+  scheduler:
+    factor: 0.5
+    patience: 5
+    min_lr: 1e-6
+    cooldown: 2        # 衰减后冷却2轮，避免频繁调整
+
+
+  epochs: 400
+  patience: 10
+  save_dir: "checkpoints"
+
+# predict config
+predict:
+  save_dir: "results"
