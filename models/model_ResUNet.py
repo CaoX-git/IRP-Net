@@ -111,7 +111,7 @@ class Decoder(nn.Module):
         return x
 
 # CBAM_ResUNet
-class CBAM_ResUNet(nn.Module):
+class ResUNet(nn.Module):
     """
     输入 [B,in_ch,H,W] 输出 [B,out_ch,H,W]
     """
@@ -156,7 +156,7 @@ class CBAM_ResUNet(nn.Module):
 
 # 测试模型
 if __name__ == '__main__':
-    model = CBAM_ResUNet(in_ch=1, out_ch=2, bilinear=True, base_c=64).to('cuda')
+    model = ResUNet(in_ch=1, out_ch=2, bilinear=True, base_c=64).to('cuda')
     print("-" * 30)
     print(model)
 

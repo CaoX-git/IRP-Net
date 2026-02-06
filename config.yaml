@@ -17,7 +17,7 @@ augmentation:
 
 # model config
 model: 
-  type: "CBAM_UNet_nobridge"
+  type: "ResUNet"
   params:
     base_c: 64
 
