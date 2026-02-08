@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# region CBAM_ResUNet
+# region CBAM_UNet
 
 # CBAM Block
 class CBAM(nn.Module):
@@ -44,8 +44,8 @@ class CBAM(nn.Module):
 
         return x * spatial_att
 
-# ConvBNReLU Block
-class ConvBNReLU(nn.Sequential):
+# ConvReLU Block
+class ConvReLU(nn.Sequential):
     def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1, dilation=1, groups=1, bias=False):
         super().__init__(
             nn.Conv2d(in_ch, out_ch, kernel_size, stride, padding, dilation, groups, bias),
@@ -53,71 +53,48 @@ class ConvBNReLU(nn.Sequential):
             nn.ReLU(inplace=True)
         )
 
-# Residual Block
-class ResBlock(nn.Sequential):
+# DoubleConv Block
+class DoubleConv(nn.Sequential):
     def __init__(self, in_ch, out_ch, mid_ch=None):
-        super(ResBlock, self).__init__()
         if not mid_ch:
             mid_ch = out_ch
-        # 主路径：两层卷积
-        self.conv_path = nn.Sequential(
-            ConvBNReLU(in_ch, mid_ch),
-            nn.Conv2d(mid_ch, out_ch, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(out_ch)
+        super().__init__(
+            ConvReLU(in_ch, mid_ch),
+            ConvReLU(mid_ch, out_ch)
         )
-        
-        # 捷径路径：处理输入输出通道不一致的情况
-        self.shortcut = nn.Sequential()
-        if in_ch != out_ch:
-            self.shortcut = nn.Sequential(
-                nn.Conv2d(in_ch, out_ch, kernel_size=1, stride=1, bias=False),
-                nn.BatchNorm2d(out_ch)
-            )
-        
-        # 最后使用激活函数
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        out = self.conv_path(x)
-        out += self.shortcut(x)
-        return self.relu(out)
 
 # Encoder Block
 class Encoder(nn.Module):
     def __init__(self, in_ch, out_ch, mid_ch=None):
         super().__init__()
         self.down = nn.MaxPool2d(2)
-        self.double_conv = ResBlock(in_ch, out_ch, mid_ch)
-        self.CBAM = CBAM(out_ch)
+        self.double_conv = DoubleConv(in_ch, out_ch, mid_ch)
     def forward(self, x):
         x = self.down(x)
         x = self.double_conv(x)
-        # x = self.CBAM(x)
         return x
 
 # Decoder Block
 class Decoder(nn.Module):
     def __init__(self, in_ch, concat_ch, out_ch, mid_ch=None):
         super().__init__()
-        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
-        self.ConcatConv = ResBlock(in_ch + concat_ch, out_ch, mid_ch)
-        self.CBAM = CBAM(out_ch)
+        self.up = nn.ConvTranspose2d(in_ch, in_ch // 2, kernel_size=2, stride=2)
+        self.ConcatConv = DoubleConv((in_ch // 2) + concat_ch, out_ch, mid_ch)
     
     def forward(self, x, concat):
         x = self.up(x)
         x = torch.cat([x, concat], dim=1)
         x = self.ConcatConv(x)
-        # x = self.CBAM(x)
         return x
 
-# CBAM_ResUNet
-class ResUNet(nn.Module):
+# UNet
+class UNet_BN(nn.Module):
     """
     输入 [B,in_ch,H,W] 输出 [B,out_ch,H,W]
     """
     def __init__(self, in_ch=1, out_ch=2, bilinear=True, base_c=64):
         super().__init__()
-        self.input = ResBlock(in_ch, base_c)
+        self.input = DoubleConv(in_ch, base_c)
         self.enc1 = Encoder(base_c, base_c * 2)
         self.enc2 = Encoder(base_c * 2, base_c * 4)
         self.enc3 = Encoder(base_c * 4, base_c * 8)
@@ -152,9 +129,8 @@ class ResUNet(nn.Module):
 
 # endregion
 
-# 测试模型
 if __name__ == '__main__':
-    model = ResUNet(in_ch=1, out_ch=2, bilinear=True, base_c=64).to('cuda')
+    model = UNet_BN(in_ch=1, out_ch=2, bilinear=True, base_c=64).to('cuda')
     print("-" * 30)
     print(model)
 

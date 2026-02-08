@@ -17,7 +17,7 @@ augmentation:
 
 # model config
 model: 
-  type: "ResUNet"
+  type: "UNet_BN"
   params:
     base_c: 64
 

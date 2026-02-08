@@ -105,7 +105,7 @@ def predict(archive_path, roi_path, mask_path = None):
     plt.show()  # 弹出窗口显示图像
 
 if __name__ == "__main__":
-    archive_path = "archive/CBAM_ResUNet_nobridge_260205144124"
+    archive_path = "archive/UNet_260207161748"
     roi_path = "data_template/dataset_experiment/img1.png"
     mask_path = None
 
